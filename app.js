@@ -5,6 +5,50 @@
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+  /* ---- Küçük yardımcılar ---- */
+  const store = {
+    get(key, fallback) {
+      try { const v = localStorage.getItem("kp_" + key); return v ? JSON.parse(v) : fallback; }
+      catch { return fallback; }
+    },
+    set(key, val) { try { localStorage.setItem("kp_" + key, JSON.stringify(val)); } catch {} },
+  };
+
+  // Hafif geri bildirim: minik ses + titreşim (destekleyen cihazlarda)
+  let audioCtx;
+  function feedback(freq = 660) {
+    if (navigator.vibrate) navigator.vibrate(30);
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + 0.26);
+    } catch {}
+  }
+
+  function copyToClipboard(text, btn) {
+    const done = () => {
+      if (!btn) return;
+      const old = btn.textContent;
+      btn.textContent = "✓ Kopyalandı";
+      btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(done);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } catch {}
+      ta.remove(); done();
+    }
+  }
+
   /* ---- Kartları görünürken yumuşakça getir ---- */
   const io = new IntersectionObserver(
     (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
@@ -34,6 +78,7 @@
       coin.classList.remove("flipping");
       coin.classList.add(yes ? "result-yes" : "result-no");
       coinHint.textContent = rand(hints);
+      feedback(yes ? 760 : 480);
       coinBusy = false;
     }, 1500);
   });
@@ -42,13 +87,14 @@
   const canvas = $("#wheelCanvas");
   const ctx = canvas.getContext("2d");
   const palette = ["#8b7bff", "#5fd0c5", "#ffb37a", "#ff8095", "#7aa7ff", "#c08bff", "#6ddf9c"];
-  let options = ["Evet, yap", "Bekle", "Belki yarın", "Kesinlikle"];
+  let options = store.get("wheel", ["Evet, yap", "Bekle", "Belki yarın", "Kesinlikle"]);
   let wheelAngle = 0;
   let wheelBusy = false;
   const chipsBox = $("#wheelChips");
   const wheelResult = $("#wheelResult");
+  const wheelCopy = $("#wheelCopy");
 
-  function drawWheel() {
+  function drawWheel(highlight = -1) {
     const n = options.length;
     const r = canvas.width / 2;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -66,6 +112,15 @@
       ctx.closePath();
       ctx.fillStyle = palette[i % palette.length];
       ctx.fill();
+      if (i === highlight) {
+        ctx.save();
+        ctx.fillStyle = "rgba(255,255,255,0.22)";
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = "#fff";
+        ctx.stroke();
+        ctx.restore();
+      }
       // metin
       ctx.save();
       ctx.translate(r, r);
@@ -93,6 +148,9 @@
       x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", `${opt} sil`);
       x.addEventListener("click", () => {
         options.splice(i, 1);
+        store.set("wheel", options);
+        wheelCopy.hidden = true;
+        canvas.classList.remove("won");
         renderChips(); drawWheel();
       });
       chip.appendChild(x);
@@ -106,6 +164,7 @@
     const val = input.value.trim();
     if (!val || options.length >= 8) { input.value = ""; return; }
     options.push(val);
+    store.set("wheel", options);
     input.value = "";
     renderChips(); drawWheel();
   });
@@ -114,6 +173,9 @@
     if (wheelBusy || options.length < 2) return;
     wheelBusy = true;
     wheelResult.textContent = "";
+    wheelCopy.hidden = true;
+    canvas.classList.remove("won");
+    void canvas.offsetWidth;
     const turns = 5 + Math.random() * 4;
     const finalRot = wheelAngle + turns * Math.PI * 2 + Math.random() * Math.PI * 2;
     canvas.style.transform = `rotate(${finalRot}rad)`;
@@ -124,6 +186,11 @@
     const idx = Math.floor(pointerAngle / slice) % options.length;
     setTimeout(() => {
       wheelResult.innerHTML = `Pusula diyor ki: <strong>${options[idx]}</strong>`;
+      drawWheel(idx);
+      canvas.classList.add("won");
+      feedback(700);
+      wheelCopy.hidden = false;
+      wheelCopy.onclick = () => copyToClipboard(`Karar Pusulası → ${options[idx]}`, wheelCopy);
       wheelBusy = false;
     }, 4600);
   });
@@ -132,12 +199,15 @@
   drawWheel();
 
   /* ============ 3. Karar Tartısı ============ */
-  const pros = [];
-  const cons = [];
+  const pros = store.get("pros", []);
+  const cons = store.get("cons", []);
   const proList = $("#proList");
   const conList = $("#conList");
   const scaleFill = $("#scaleFill");
   const verdict = $("#scaleVerdict");
+  const scaleCopy = $("#scaleCopy");
+  const scaleClear = $("#scaleClear");
+  let lastVerdict = "";
 
   function renderScale() {
     [["pro", pros, proList], ["con", cons, conList]].forEach(([side, arr, ul]) => {
@@ -157,12 +227,18 @@
       });
     });
 
+    store.set("pros", pros);
+    store.set("cons", cons);
+    const hasItems = pros.length + cons.length > 0;
+    scaleClear.hidden = !hasItems;
+
     const proScore = pros.reduce((s, x) => s + x.weight, 0);
     const conScore = cons.reduce((s, x) => s + x.weight, 0);
     const total = proScore + conScore;
     if (total === 0) {
       scaleFill.style.width = "50%";
       verdict.textContent = "Henüz tartacak bir şey yok. Birkaç madde ekle.";
+      scaleCopy.hidden = true;
       return;
     }
     const pct = (proScore / total) * 100;
@@ -173,7 +249,25 @@
     else if (diff < -2) msg = `Terazi “hayır”a ağıyor (👍 ${proScore} – 👎 ${conScore}). Belki şimdi değil.`;
     else msg = `Neredeyse başa baş (👍 ${proScore} – 👎 ${conScore}). Çok yakınsa, küçük bir deneme yap ya da ertele.`;
     verdict.textContent = msg;
+    lastVerdict = msg;
+    scaleCopy.hidden = false;
   }
+
+  scaleCopy.addEventListener("click", () => {
+    const lines = [
+      "Karar Pusulası · Tartı",
+      "👍 Artılar: " + (pros.map((p) => `${p.text}(${p.weight})`).join(", ") || "—"),
+      "👎 Eksiler: " + (cons.map((c) => `${c.text}(${c.weight})`).join(", ") || "—"),
+      "",
+      lastVerdict,
+    ].join("\n");
+    copyToClipboard(lines, scaleCopy);
+  });
+
+  scaleClear.addEventListener("click", () => {
+    pros.length = 0; cons.length = 0;
+    renderScale();
+  });
 
   $$(".scale-add").forEach((form) => {
     form.addEventListener("submit", (e) => {
@@ -188,6 +282,8 @@
       renderScale();
     });
   });
+
+  renderScale(); // kayıtlı maddeleri göster
 
   /* ============ 4. Mini Kararlar ============ */
   const ideas = {

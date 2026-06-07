@@ -64,6 +64,7 @@
             <button type="submit" class="btn btn-ghost" aria-label="Ekle">＋</button>
           </form>
           <p class="wheel-result" id="wheelResult" aria-live="polite"></p>
+          <button class="btn btn-ghost copy-btn" id="wheelCopy" type="button" hidden>📋 Sonucu kopyala</button>
         </div>
       </div>
     </section>
@@ -105,6 +106,10 @@
         <div class="scale-fill" id="scaleFill"></div>
       </div>
       <p class="scale-verdict" id="scaleVerdict" aria-live="polite">Henüz tartacak bir şey yok. Birkaç madde ekle.</p>
+      <div class="scale-actions">
+        <button class="btn btn-ghost copy-btn" id="scaleCopy" type="button" hidden>📋 Kararı kopyala</button>
+        <button class="btn btn-ghost" id="scaleClear" type="button" hidden>🗑️ Temizle</button>
+      </div>
     </section>
 
     <!-- 4. Mini Kararlar -->
