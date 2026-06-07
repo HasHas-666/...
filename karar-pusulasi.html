@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Karar Pusulası — kararsızlığı yok eden sakin, şık bir karar verme aracı." />
+  <title>Karar Pusulası · Kararsızlığa son</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+/* ===== Karar Pusulası · Tema ===== */
+:root {
+  --bg: #0e1024;
+  --bg-soft: #161a36;
+  --ink: #eef1ff;
+  --ink-soft: #aab0d6;
+  --line: rgba(255, 255, 255, 0.10);
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.09);
+  --accent: #8b7bff;
+  --accent-2: #5fd0c5;
+  --warm: #ffb37a;
+  --yes: #5fd0c5;
+  --no: #ff8095;
+  --radius: 22px;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ===== Hareketli arka plan ===== */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 800px at 80% -10%, #221a4d 0%, transparent 60%),
+    radial-gradient(900px 700px at 0% 100%, #10233a 0%, transparent 55%),
+    var(--bg);
+}
+.blob {
+  position: absolute;
+  width: 46vmax;
+  height: 46vmax;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.5;
+  animation: drift 22s var(--ease) infinite alternate;
+}
+.blob-1 { background: #6a5bff; top: -12%; left: -8%; }
+.blob-2 { background: #34b6a7; bottom: -18%; right: -10%; animation-delay: -7s; }
+.blob-3 { background: #ff8c66; top: 30%; left: 55%; opacity: 0.32; animation-delay: -13s; }
+@keyframes drift {
+  to { transform: translate3d(6%, 8%, 0) scale(1.18) rotate(28deg); }
+}
+
+/* ===== Hero ===== */
+.hero {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: clamp(72px, 12vh, 150px) 24px 40px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-block;
+  padding: 7px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin-bottom: 26px;
+}
+.hero-title {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  line-height: 1.04;
+  margin: 0 0 20px;
+  letter-spacing: -0.02em;
+}
+.hero-title em {
+  font-style: italic;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2) 70%, var(--warm));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-sub {
+  max-width: 540px;
+  margin: 0 auto 34px;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 30px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #11122a;
+  background: linear-gradient(120deg, var(--accent-2), var(--accent));
+  box-shadow: 0 12px 30px rgba(139, 123, 255, 0.4);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(139, 123, 255, 0.55); }
+.hero-cta span { transition: transform 0.3s var(--ease); }
+.hero-cta:hover span { transform: translateY(3px); }
+
+/* ===== Grid ===== */
+.grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+.card-wide { grid-column: 1 / -1; }
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ===== Kart ===== */
+.card {
+  position: relative;
+  padding: 30px;
+  border-radius: var(--radius);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.card.in { opacity: 1; transform: none; }
+.card:hover { border-color: rgba(255, 255, 255, 0.2); }
+.card-icon {
+  font-size: 2rem;
+  width: 58px; height: 58px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+  background: var(--glass-strong);
+  border: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+.card h2 {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 1.55rem;
+  margin: 0 0 8px;
+}
+.card-desc { color: var(--ink-soft); margin: 0 0 22px; font-size: 0.97rem; }
+
+/* ===== Butonlar ===== */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  padding: 13px 22px;
+  transition: transform 0.2s var(--ease), background 0.3s, box-shadow 0.3s;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  width: 100%;
+  color: #11122a;
+  background: linear-gradient(120deg, var(--accent-2), var(--accent));
+  box-shadow: 0 10px 24px rgba(139, 123, 255, 0.32);
+}
+.btn-primary:hover { box-shadow: 0 14px 30px rgba(139, 123, 255, 0.5); }
+.btn-ghost {
+  background: var(--glass-strong);
+  border-color: var(--line);
+  color: var(--ink);
+  padding: 11px 16px;
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.16); }
+
+/* ===== 1. Yazı-Tura ===== */
+.coin-stage { display: grid; place-items: center; height: 150px; margin-bottom: 18px; perspective: 900px; }
+.coin {
+  position: relative;
+  width: 118px; height: 118px;
+  transform-style: preserve-3d;
+  transition: transform 0.2s;
+}
+.coin.flipping { animation: flip 1.5s var(--ease) forwards; }
+.coin-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 0 4px rgba(255,255,255,0.25), var(--shadow);
+}
+.coin-yes { background: radial-gradient(circle at 35% 30%, #8fffe9, var(--yes)); color: #053b35; }
+.coin-no  { background: radial-gradient(circle at 35% 30%, #ffb3c0, var(--no)); color: #4a0c1b; transform: rotateY(180deg); }
+@keyframes flip {
+  0%   { transform: rotateY(0); }
+  100% { transform: rotateY(1980deg); }
+}
+.coin.result-no { transform: rotateY(180deg); }
+.coin.result-yes { transform: rotateY(0deg); }
+.coin-hint { margin: 18px 0 0; font-size: 0.86rem; color: var(--ink-soft); font-style: italic; min-height: 2.4em; }
+
+/* ===== 2. Çark ===== */
+.wheel-layout { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: center; }
+@media (max-width: 720px) { .wheel-layout { grid-template-columns: 1fr; justify-items: center; } }
+.wheel-stage { position: relative; width: 320px; height: 320px; }
+#wheelCanvas { border-radius: 50%; box-shadow: var(--shadow); transition: transform 4.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.wheel-pointer {
+  position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+  color: var(--warm); font-size: 1.6rem; z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.wheel-spin {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 78px; height: 78px; border-radius: 50%; cursor: pointer;
+  border: 4px solid #fff; background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  color: #fff; font-weight: 600; font-family: "Fraunces", serif; font-size: 1rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4); z-index: 2;
+  transition: transform 0.2s var(--ease);
+}
+.wheel-spin:hover { transform: translate(-50%, -50%) scale(1.07); }
+.wheel-spin:disabled { opacity: 0.6; cursor: not-allowed; }
+.wheel-controls { width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--glass-strong); border: 1px solid var(--line); font-size: 0.88rem;
+}
+.chip button { background: none; border: none; color: var(--ink-soft); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; }
+.chip button:hover { color: var(--no); }
+.wheel-add, .scale-add { display: flex; gap: 8px; }
+.wheel-add input, .scale-add input {
+  flex: 1; min-width: 0;
+  padding: 11px 14px; border-radius: 12px;
+  background: rgba(0,0,0,0.22); border: 1px solid var(--line); color: var(--ink); font: inherit;
+}
+.wheel-add input:focus, .scale-add input:focus { outline: none; border-color: var(--accent); }
+.wheel-result { margin: 16px 0 0; font-family: "Fraunces", serif; font-size: 1.3rem; min-height: 1.5em; }
+.wheel-result strong { color: var(--accent-2); }
+
+/* ===== 3. Tartı ===== */
+.scale-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 560px) { .scale-layout { grid-template-columns: 1fr; } }
+.scale-col { padding: 18px; border-radius: 16px; background: rgba(0,0,0,0.18); border: 1px solid var(--line); }
+.scale-col h3 { margin: 0 0 14px; font-size: 1.05rem; }
+.scale-pro { box-shadow: inset 0 0 0 1px rgba(95,208,197,0.18); }
+.scale-con { box-shadow: inset 0 0 0 1px rgba(255,128,149,0.18); }
+.scale-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.scale-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 12px; border-radius: 10px; background: var(--glass); font-size: 0.9rem;
+}
+.scale-list .wlabel {
+  font-size: 0.72rem; padding: 2px 8px; border-radius: 999px;
+  background: var(--glass-strong); color: var(--ink-soft); white-space: nowrap;
+}
+.scale-list .del { background: none; border: none; color: var(--ink-soft); cursor: pointer; font-size: 1rem; }
+.scale-list .del:hover { color: var(--no); }
+.scale-add select {
+  padding: 0 8px; border-radius: 12px; background: rgba(0,0,0,0.22);
+  border: 1px solid var(--line); color: var(--ink); font: inherit;
+}
+.scale-meter {
+  height: 14px; border-radius: 999px; margin: 26px 0 14px; overflow: hidden;
+  background: linear-gradient(90deg, rgba(255,128,149,0.25), rgba(95,208,197,0.25));
+  border: 1px solid var(--line);
+}
+.scale-fill {
+  height: 100%; width: 50%;
+  background: linear-gradient(90deg, var(--no), var(--accent), var(--yes));
+  border-radius: 999px; transition: width 0.7s var(--ease);
+}
+.scale-verdict { text-align: center; font-family: "Fraunces", serif; font-size: 1.2rem; margin: 6px 0 0; }
+
+/* ===== 4. Mini ===== */
+.mini-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.mini-tab {
+  flex: 1; min-width: 110px;
+  padding: 10px; border-radius: 12px; cursor: pointer; font: inherit; font-weight: 500;
+  background: var(--glass); border: 1px solid var(--line); color: var(--ink-soft);
+  transition: all 0.25s var(--ease);
+}
+.mini-tab.is-active { background: var(--glass-strong); color: var(--ink); border-color: var(--accent); }
+.mini-output {
+  min-height: 90px; display: grid; place-items: center; text-align: center;
+  padding: 20px; margin-bottom: 18px; border-radius: 16px;
+  background: rgba(0,0,0,0.2); border: 1px solid var(--line);
+  font-family: "Fraunces", serif; font-size: 1.25rem; color: var(--ink);
+  transition: opacity 0.3s;
+}
+
+/* ===== 5. Nefes ===== */
+.breathe-stage { display: grid; place-items: center; height: 200px; margin-bottom: 14px; }
+.breathe-circle {
+  width: 120px; height: 120px; border-radius: 50%;
+  display: grid; place-items: center; text-align: center;
+  background: radial-gradient(circle at 35% 30%, rgba(95,208,197,0.55), rgba(139,123,255,0.35));
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 50px rgba(95,208,197,0.35);
+  font-size: 0.95rem; color: var(--ink);
+  transition: transform 0.4s var(--ease);
+}
+.breathe-circle.run { animation: breathe 14s ease-in-out infinite; }
+@keyframes breathe {
+  0%, 100% { transform: scale(1);   box-shadow: 0 0 40px rgba(95,208,197,0.3); }
+  28%      { transform: scale(1.7); box-shadow: 0 0 80px rgba(95,208,197,0.6); }  /* 4s al */
+  57%      { transform: scale(1.7); box-shadow: 0 0 80px rgba(139,123,255,0.6); } /* 4s tut */
+}
+
+/* ===== Footer ===== */
+.footer { max-width: 720px; margin: 0 auto; padding: 30px 24px 70px; text-align: center; }
+.footer-quote { font-family: "Fraunces", serif; font-style: italic; font-size: 1.3rem; color: var(--ink); margin: 0 0 16px; }
+.footer-note { color: var(--ink-soft); font-size: 0.85rem; margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blob, .breathe-circle.run, .coin.flipping { animation: none !important; }
+  * { transition-duration: 0.001s !important; }
+}
+
+</style>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+</head>
+<body>
+  <!-- Yumuşak hareketli arka plan -->
+  <div class="aurora" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-badge">🧭 Karar Pusulası</div>
+    <h1 class="hero-title">Kararsızlık,<br /><em>burada biter.</em></h1>
+    <p class="hero-sub">
+      Acele yok, baskı yok. Aklındaki düğümü tek tek çözen sakin bir alan.
+      Bir araç seç, gerisini birlikte hallederiz.
+    </p>
+    <a href="#araclar" class="hero-cta">Başlayalım <span aria-hidden="true">↓</span></a>
+  </header>
+
+  <main id="araclar" class="grid">
+
+    <!-- 1. Hızlı Karar -->
+    <section class="card" id="coin">
+      <div class="card-icon">🪙</div>
+      <h2>Hızlı Karar</h2>
+      <p class="card-desc">İki seçenek arasında sıkıştın mı? Bazen tek ihtiyacın küçük bir itiş.</p>
+      <div class="coin-stage">
+        <div class="coin" id="coinEl">
+          <div class="coin-face coin-yes">EVET</div>
+          <div class="coin-face coin-no">HAYIR</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="coinFlip">Yazı-Tura at</button>
+      <p class="coin-hint" id="coinHint" aria-live="polite">Hissine kulak ver: sonuç hayal kırıklığı yarattıysa, cevabını çoktan biliyorsun.</p>
+    </section>
+
+    <!-- 2. Karar Çarkı -->
+    <section class="card card-wide" id="wheel">
+      <div class="card-icon">🎡</div>
+      <h2>Karar Çarkı</h2>
+      <p class="card-desc">Seçeneklerini yaz, çarkı çevir. Talih değil, sadece zihnini özgür bırakma yöntemi.</p>
+      <div class="wheel-layout">
+        <div class="wheel-stage">
+          <div class="wheel-pointer" aria-hidden="true">▼</div>
+          <canvas id="wheelCanvas" width="320" height="320" role="img" aria-label="Karar çarkı"></canvas>
+          <button class="wheel-spin" id="wheelSpin">Çevir</button>
+        </div>
+        <div class="wheel-controls">
+          <div class="chips" id="wheelChips" aria-live="polite"></div>
+          <form id="wheelForm" class="wheel-add">
+            <input type="text" id="wheelInput" maxlength="24" placeholder="Yeni seçenek ekle…" aria-label="Yeni seçenek" />
+            <button type="submit" class="btn btn-ghost" aria-label="Ekle">＋</button>
+          </form>
+          <p class="wheel-result" id="wheelResult" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Karar Tartısı -->
+    <section class="card card-wide" id="scale">
+      <div class="card-icon">⚖️</div>
+      <h2>Karar Tartısı</h2>
+      <p class="card-desc">Büyük kararlar için. Artıları ve eksileri yaz, her birine 1–5 ağırlık ver. Pusula senin için tartar.</p>
+      <div class="scale-layout">
+        <div class="scale-col scale-pro">
+          <h3>👍 Artılar</h3>
+          <ul class="scale-list" id="proList"></ul>
+          <form class="scale-add" data-side="pro">
+            <input type="text" maxlength="40" placeholder="Bir artı ekle…" aria-label="Artı ekle" />
+            <select aria-label="Önem" title="Önem (1-5)">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3" selected>3</option><option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <button type="submit" class="btn btn-ghost">＋</button>
+          </form>
+        </div>
+        <div class="scale-col scale-con">
+          <h3>👎 Eksiler</h3>
+          <ul class="scale-list" id="conList"></ul>
+          <form class="scale-add" data-side="con">
+            <input type="text" maxlength="40" placeholder="Bir eksi ekle…" aria-label="Eksi ekle" />
+            <select aria-label="Önem" title="Önem (1-5)">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3" selected>3</option><option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <button type="submit" class="btn btn-ghost">＋</button>
+          </form>
+        </div>
+      </div>
+      <div class="scale-meter" aria-hidden="true">
+        <div class="scale-fill" id="scaleFill"></div>
+      </div>
+      <p class="scale-verdict" id="scaleVerdict" aria-live="polite">Henüz tartacak bir şey yok. Birkaç madde ekle.</p>
+    </section>
+
+    <!-- 4. Mini Kararlar -->
+    <section class="card" id="mini">
+      <div class="card-icon">🍽️</div>
+      <h2>Günün Mini Kararları</h2>
+      <p class="card-desc">Küçük şeyler yormasın. Bir konu seç, sana hazır bir öneri sunayım.</p>
+      <div class="mini-tabs" id="miniTabs">
+        <button class="mini-tab is-active" data-topic="yemek">Ne yesem?</button>
+        <button class="mini-tab" data-topic="aktivite">Ne yapsam?</button>
+        <button class="mini-tab" data-topic="kucuk">Kendine iyilik</button>
+      </div>
+      <div class="mini-output" id="miniOutput">Bir buton seç…</div>
+      <button class="btn btn-primary" id="miniRoll">Öner</button>
+    </section>
+
+    <!-- 5. Sakinleş -->
+    <section class="card" id="breathe">
+      <div class="card-icon">🌬️</div>
+      <h2>Önce bir nefes</h2>
+      <p class="card-desc">Kalp hızlandıysa, karar bekleyebilir. 4 saniye al, 4 tut, 6 ver. Çemberle birlikte.</p>
+      <div class="breathe-stage">
+        <div class="breathe-circle" id="breatheCircle">
+          <span id="breatheText">Başla</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="breatheBtn">Nefes egzersizini başlat</button>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p class="footer-quote" id="footerQuote">“En iyi karar genellikle bir sonrakini almana izin verendir.”</p>
+    <p class="footer-note">Karar Pusulası · Hiçbir verin kaydedilmez, her şey senin tarayıcında kalır. 🤍</p>
+  </footer>
+
+  <script>
+/* ===== Karar Pusulası · Etkileşim ===== */
+(() => {
+  "use strict";
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  /* ---- Kartları görünürken yumuşakça getir ---- */
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
+    { threshold: 0.15 }
+  );
+  $$(".card").forEach((c) => io.observe(c));
+
+  /* ============ 1. Yazı-Tura ============ */
+  const coin = $("#coinEl");
+  const coinHint = $("#coinHint");
+  const hints = [
+    "Hissine kulak ver: sonuç hayal kırıklığı yarattıysa, cevabını çoktan biliyorsun.",
+    "İçinden “bir daha atsam mı?” geçtiyse, gerçek tercihin ortada.",
+    "Çoğu zaman doğru cevap, attığın anda hissettiğin ilk duygudur.",
+    "Sonuç ne olursa olsun, küçük bir adım büyük bir tıkanıklıktan iyidir.",
+  ];
+  let coinBusy = false;
+  $("#coinFlip").addEventListener("click", () => {
+    if (coinBusy) return;
+    coinBusy = true;
+    const yes = Math.random() < 0.5;
+    coin.classList.remove("result-yes", "result-no", "flipping");
+    void coin.offsetWidth; // reflow → animasyonu yeniden tetikle
+    coin.classList.add("flipping");
+    coinHint.textContent = "…";
+    setTimeout(() => {
+      coin.classList.remove("flipping");
+      coin.classList.add(yes ? "result-yes" : "result-no");
+      coinHint.textContent = rand(hints);
+      coinBusy = false;
+    }, 1500);
+  });
+
+  /* ============ 2. Karar Çarkı ============ */
+  const canvas = $("#wheelCanvas");
+  const ctx = canvas.getContext("2d");
+  const palette = ["#8b7bff", "#5fd0c5", "#ffb37a", "#ff8095", "#7aa7ff", "#c08bff", "#6ddf9c"];
+  let options = ["Evet, yap", "Bekle", "Belki yarın", "Kesinlikle"];
+  let wheelAngle = 0;
+  let wheelBusy = false;
+  const chipsBox = $("#wheelChips");
+  const wheelResult = $("#wheelResult");
+
+  function drawWheel() {
+    const n = options.length;
+    const r = canvas.width / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (n === 0) {
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.beginPath(); ctx.arc(r, r, r, 0, Math.PI * 2); ctx.fill();
+      return;
+    }
+    const slice = (Math.PI * 2) / n;
+    for (let i = 0; i < n; i++) {
+      const start = i * slice + wheelAngle;
+      ctx.beginPath();
+      ctx.moveTo(r, r);
+      ctx.arc(r, r, r, start, start + slice);
+      ctx.closePath();
+      ctx.fillStyle = palette[i % palette.length];
+      ctx.fill();
+      // metin
+      ctx.save();
+      ctx.translate(r, r);
+      ctx.rotate(start + slice / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "rgba(10,12,30,0.85)";
+      ctx.font = "600 14px Inter, sans-serif";
+      const label = options[i].length > 14 ? options[i].slice(0, 13) + "…" : options[i];
+      ctx.fillText(label, r - 16, 5);
+      ctx.restore();
+    }
+    // merkez halkası
+    ctx.beginPath(); ctx.arc(r, r, 42, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(14,16,36,0.9)"; ctx.fill();
+  }
+
+  function renderChips() {
+    chipsBox.innerHTML = "";
+    options.forEach((opt, i) => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      const dot = `<span style="width:9px;height:9px;border-radius:50%;background:${palette[i % palette.length]}"></span>`;
+      chip.innerHTML = `${dot}<span>${opt}</span>`;
+      const x = document.createElement("button");
+      x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", `${opt} sil`);
+      x.addEventListener("click", () => {
+        options.splice(i, 1);
+        renderChips(); drawWheel();
+      });
+      chip.appendChild(x);
+      chipsBox.appendChild(chip);
+    });
+  }
+
+  $("#wheelForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = $("#wheelInput");
+    const val = input.value.trim();
+    if (!val || options.length >= 8) { input.value = ""; return; }
+    options.push(val);
+    input.value = "";
+    renderChips(); drawWheel();
+  });
+
+  $("#wheelSpin").addEventListener("click", () => {
+    if (wheelBusy || options.length < 2) return;
+    wheelBusy = true;
+    wheelResult.textContent = "";
+    const turns = 5 + Math.random() * 4;
+    const finalRot = wheelAngle + turns * Math.PI * 2 + Math.random() * Math.PI * 2;
+    canvas.style.transform = `rotate(${finalRot}rad)`;
+    const slice = (Math.PI * 2) / options.length;
+    // İbre tepe noktasında (12 yön = -PI/2). Hangi dilim oraya denk geliyor?
+    const norm = ((finalRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const pointerAngle = (-Math.PI / 2 - norm + Math.PI * 4) % (Math.PI * 2);
+    const idx = Math.floor(pointerAngle / slice) % options.length;
+    setTimeout(() => {
+      wheelResult.innerHTML = `Pusula diyor ki: <strong>${options[idx]}</strong>`;
+      wheelBusy = false;
+    }, 4600);
+  });
+
+  renderChips();
+  drawWheel();
+
+  /* ============ 3. Karar Tartısı ============ */
+  const pros = [];
+  const cons = [];
+  const proList = $("#proList");
+  const conList = $("#conList");
+  const scaleFill = $("#scaleFill");
+  const verdict = $("#scaleVerdict");
+
+  function renderScale() {
+    [["pro", pros, proList], ["con", cons, conList]].forEach(([side, arr, ul]) => {
+      ul.innerHTML = "";
+      arr.forEach((item, i) => {
+        const li = document.createElement("li");
+        const txt = document.createElement("span");
+        txt.textContent = item.text;
+        const w = document.createElement("span");
+        w.className = "wlabel"; w.textContent = "önem " + item.weight;
+        const del = document.createElement("button");
+        del.className = "del"; del.type = "button"; del.textContent = "×";
+        del.setAttribute("aria-label", "Sil");
+        del.addEventListener("click", () => { arr.splice(i, 1); renderScale(); });
+        li.append(txt, w, del);
+        ul.appendChild(li);
+      });
+    });
+
+    const proScore = pros.reduce((s, x) => s + x.weight, 0);
+    const conScore = cons.reduce((s, x) => s + x.weight, 0);
+    const total = proScore + conScore;
+    if (total === 0) {
+      scaleFill.style.width = "50%";
+      verdict.textContent = "Henüz tartacak bir şey yok. Birkaç madde ekle.";
+      return;
+    }
+    const pct = (proScore / total) * 100;
+    scaleFill.style.width = pct.toFixed(0) + "%";
+    const diff = proScore - conScore;
+    let msg;
+    if (diff > 2) msg = `Terazi “evet”e ağıyor (👍 ${proScore} – 👎 ${conScore}). İçin de rahatsa, ilerle.`;
+    else if (diff < -2) msg = `Terazi “hayır”a ağıyor (👍 ${proScore} – 👎 ${conScore}). Belki şimdi değil.`;
+    else msg = `Neredeyse başa baş (👍 ${proScore} – 👎 ${conScore}). Çok yakınsa, küçük bir deneme yap ya da ertele.`;
+    verdict.textContent = msg;
+  }
+
+  $$(".scale-add").forEach((form) => {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = $("input", form);
+      const select = $("select", form);
+      const text = input.value.trim();
+      if (!text) return;
+      const item = { text, weight: parseInt(select.value, 10) };
+      (form.dataset.side === "pro" ? pros : cons).push(item);
+      input.value = "";
+      renderScale();
+    });
+  });
+
+  /* ============ 4. Mini Kararlar ============ */
+  const ideas = {
+    yemek: [
+      "Bugün sevdiğin o basit makarnayı yap — abartma.", "Sıcak bir çorba ısmarla, üşenme.",
+      "Buzdolabındaki ilk üç şeyle bir omlet.", "Kendine güzel bir kahvaltı tabağı hazırla.",
+      "Fırına sebze at, gerisi kendiliğinden olur.", "Bir tost ve yanında meyve — yeter.",
+      "Yeni bir tarif dene; başarısız olursa da hikâye olur.", "Sipariş ver ve suçluluk duyma, bugün böyle.",
+    ],
+    aktivite: [
+      "20 dakikalık kısa bir yürüyüş — telefonsuz.", "Sevdiğin bir albümü baştan sona dinle.",
+      "Odanın tek bir köşesini topla, hepsini değil.", "Yarım kalmış o diziyi tek bölüm izle.",
+      "5 dakika serbest yaz: aklından geçen ne varsa.", "Birine kısa bir mesaj at: “aklıma geldin”.",
+      "Pencereyi aç, 10 dakika sadece dışarı bak.", "Eski bir fotoğraf albümünü karıştır.",
+    ],
+    kucuk: [
+      "Bir bardak su iç — gerçekten, şimdi.", "Omuzlarını indir, çeneni gevşet.",
+      "Bugün yapmadığın bir şey için kendini suçlama.", "Telefonu 30 dakika uçak moduna al.",
+      "Yapılacaklar listenden en küçük maddeyi sil ya da yap.", "Aynaya bak ve bir güzel şey söyle.",
+      "Yarına bir şeyi ertelemek de bir karardır — sorun değil.", "Derin bir nefes: bu an yeterince iyi.",
+    ],
+  };
+  let miniTopic = "yemek";
+  const miniOutput = $("#miniOutput");
+  $("#miniTabs").addEventListener("click", (e) => {
+    const tab = e.target.closest(".mini-tab");
+    if (!tab) return;
+    miniTopic = tab.dataset.topic;
+    $$(".mini-tab").forEach((t) => t.classList.toggle("is-active", t === tab));
+    rollMini();
+  });
+  function rollMini() {
+    miniOutput.style.opacity = "0";
+    setTimeout(() => {
+      miniOutput.textContent = rand(ideas[miniTopic]);
+      miniOutput.style.opacity = "1";
+    }, 200);
+  }
+  $("#miniRoll").addEventListener("click", rollMini);
+
+  /* ============ 5. Nefes ============ */
+  const circle = $("#breatheCircle");
+  const breatheText = $("#breatheText");
+  const btn = $("#breatheBtn");
+  let breathing = false;
+  let breatheTimers = [];
+  function clearBreathe() { breatheTimers.forEach(clearTimeout); breatheTimers = []; }
+  function cycle() {
+    // 4s al · 4s tut · 6s ver  = 14s (CSS animasyonu ile senkron)
+    breatheText.textContent = "Nefes al…";
+    breatheTimers.push(setTimeout(() => (breatheText.textContent = "Tut…"), 4000));
+    breatheTimers.push(setTimeout(() => (breatheText.textContent = "Yavaşça ver…"), 8000));
+  }
+  btn.addEventListener("click", () => {
+    breathing = !breathing;
+    if (breathing) {
+      circle.classList.add("run");
+      btn.textContent = "Durdur";
+      cycle();
+      breatheTimers.push(setInterval(cycle, 14000));
+    } else {
+      clearBreathe();
+      circle.classList.remove("run");
+      breatheText.textContent = "Başla";
+      btn.textContent = "Nefes egzersizini başlat";
+    }
+  });
+
+  /* ============ Footer · dönen alıntı ============ */
+  const quotes = [
+    "“En iyi karar genellikle bir sonrakini almana izin verendir.”",
+    "“Mükemmel kararı bekleme; iyi bir karar al, gerisini düzelt.”",
+    "“Karasızlık da bir karardır — ama nadiren senin lehine.”",
+    "“Küçük adım, donup kalmaktan her zaman iyidir.”",
+    "“Yanlış kapıyı açmaktan korkma; koridor uzun.”",
+  ];
+  const fq = $("#footerQuote");
+  let qi = 0;
+  setInterval(() => { qi = (qi + 1) % quotes.length; fq.style.opacity = "0";
+    setTimeout(() => { fq.textContent = quotes[qi]; fq.style.opacity = "1"; }, 400);
+  }, 7000);
+  fq.style.transition = "opacity 0.4s ease";
+})();
+
+</script>
+</body>
+</html>
