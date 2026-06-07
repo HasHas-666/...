@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Karar Pusulası — kararsızlığı yok eden sakin, şık bir karar verme aracı." />
+  <title>Karar Pusulası · Kararsızlığa son</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+</head>
+<body>
+  <!-- Yumuşak hareketli arka plan -->
+  <div class="aurora" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-badge">🧭 Karar Pusulası</div>
+    <h1 class="hero-title">Kararsızlık,<br /><em>burada biter.</em></h1>
+    <p class="hero-sub">
+      Acele yok, baskı yok. Aklındaki düğümü tek tek çözen sakin bir alan.
+      Bir araç seç, gerisini birlikte hallederiz.
+    </p>
+    <a href="#araclar" class="hero-cta">Başlayalım <span aria-hidden="true">↓</span></a>
+  </header>
+
+  <main id="araclar" class="grid">
+
+    <!-- 1. Hızlı Karar -->
+    <section class="card" id="coin">
+      <div class="card-icon">🪙</div>
+      <h2>Hızlı Karar</h2>
+      <p class="card-desc">İki seçenek arasında sıkıştın mı? Bazen tek ihtiyacın küçük bir itiş.</p>
+      <div class="coin-stage">
+        <div class="coin" id="coinEl">
+          <div class="coin-face coin-yes">EVET</div>
+          <div class="coin-face coin-no">HAYIR</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="coinFlip">Yazı-Tura at</button>
+      <p class="coin-hint" id="coinHint" aria-live="polite">Hissine kulak ver: sonuç hayal kırıklığı yarattıysa, cevabını çoktan biliyorsun.</p>
+    </section>
+
+    <!-- 2. Karar Çarkı -->
+    <section class="card card-wide" id="wheel">
+      <div class="card-icon">🎡</div>
+      <h2>Karar Çarkı</h2>
+      <p class="card-desc">Seçeneklerini yaz, çarkı çevir. Talih değil, sadece zihnini özgür bırakma yöntemi.</p>
+      <div class="wheel-layout">
+        <div class="wheel-stage">
+          <div class="wheel-pointer" aria-hidden="true">▼</div>
+          <canvas id="wheelCanvas" width="320" height="320" role="img" aria-label="Karar çarkı"></canvas>
+          <button class="wheel-spin" id="wheelSpin">Çevir</button>
+        </div>
+        <div class="wheel-controls">
+          <div class="chips" id="wheelChips" aria-live="polite"></div>
+          <form id="wheelForm" class="wheel-add">
+            <input type="text" id="wheelInput" maxlength="24" placeholder="Yeni seçenek ekle…" aria-label="Yeni seçenek" />
+            <button type="submit" class="btn btn-ghost" aria-label="Ekle">＋</button>
+          </form>
+          <p class="wheel-result" id="wheelResult" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Karar Tartısı -->
+    <section class="card card-wide" id="scale">
+      <div class="card-icon">⚖️</div>
+      <h2>Karar Tartısı</h2>
+      <p class="card-desc">Büyük kararlar için. Artıları ve eksileri yaz, her birine 1–5 ağırlık ver. Pusula senin için tartar.</p>
+      <div class="scale-layout">
+        <div class="scale-col scale-pro">
+          <h3>👍 Artılar</h3>
+          <ul class="scale-list" id="proList"></ul>
+          <form class="scale-add" data-side="pro">
+            <input type="text" maxlength="40" placeholder="Bir artı ekle…" aria-label="Artı ekle" />
+            <select aria-label="Önem" title="Önem (1-5)">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3" selected>3</option><option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <button type="submit" class="btn btn-ghost">＋</button>
+          </form>
+        </div>
+        <div class="scale-col scale-con">
+          <h3>👎 Eksiler</h3>
+          <ul class="scale-list" id="conList"></ul>
+          <form class="scale-add" data-side="con">
+            <input type="text" maxlength="40" placeholder="Bir eksi ekle…" aria-label="Eksi ekle" />
+            <select aria-label="Önem" title="Önem (1-5)">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3" selected>3</option><option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <button type="submit" class="btn btn-ghost">＋</button>
+          </form>
+        </div>
+      </div>
+      <div class="scale-meter" aria-hidden="true">
+        <div class="scale-fill" id="scaleFill"></div>
+      </div>
+      <p class="scale-verdict" id="scaleVerdict" aria-live="polite">Henüz tartacak bir şey yok. Birkaç madde ekle.</p>
+    </section>
+
+    <!-- 4. Mini Kararlar -->
+    <section class="card" id="mini">
+      <div class="card-icon">🍽️</div>
+      <h2>Günün Mini Kararları</h2>
+      <p class="card-desc">Küçük şeyler yormasın. Bir konu seç, sana hazır bir öneri sunayım.</p>
+      <div class="mini-tabs" id="miniTabs">
+        <button class="mini-tab is-active" data-topic="yemek">Ne yesem?</button>
+        <button class="mini-tab" data-topic="aktivite">Ne yapsam?</button>
+        <button class="mini-tab" data-topic="kucuk">Kendine iyilik</button>
+      </div>
+      <div class="mini-output" id="miniOutput">Bir buton seç…</div>
+      <button class="btn btn-primary" id="miniRoll">Öner</button>
+    </section>
+
+    <!-- 5. Sakinleş -->
+    <section class="card" id="breathe">
+      <div class="card-icon">🌬️</div>
+      <h2>Önce bir nefes</h2>
+      <p class="card-desc">Kalp hızlandıysa, karar bekleyebilir. 4 saniye al, 4 tut, 6 ver. Çemberle birlikte.</p>
+      <div class="breathe-stage">
+        <div class="breathe-circle" id="breatheCircle">
+          <span id="breatheText">Başla</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="breatheBtn">Nefes egzersizini başlat</button>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p class="footer-quote" id="footerQuote">“En iyi karar genellikle bir sonrakini almana izin verendir.”</p>
+    <p class="footer-note">Karar Pusulası · Hiçbir verin kaydedilmez, her şey senin tarayıcında kalır. 🤍</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
